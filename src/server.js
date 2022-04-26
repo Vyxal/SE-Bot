@@ -8,10 +8,6 @@ const app = express();
 
 export default app;
 
-app.use(bodyparser.urlencoded({ extended: true }));
-app.use(bodyparser.json());
-app.use(bodyparser.raw());
-
 app.use((req, res, next) => {
     const hmac = crypto.createHmac("sha256", config.github_secret);
     const data = hmac.update(req.body);
@@ -22,6 +18,10 @@ app.use((req, res, next) => {
     console.log(req.headers);
     next();
 });
+
+app.use(bodyparser.urlencoded({ extended: true }));
+app.use(bodyparser.json());
+app.use(bodyparser.raw());
 
 app.get("/fork", (req, res) => {
     console.log(req.body);
