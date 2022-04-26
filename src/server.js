@@ -29,6 +29,8 @@ app.use((req, _, next) => {
 });
 
 app.post("/fork", (req, res) => {
+    console.log(req.data);
+
     if (req.data.repository.private) return;
 
     client.room.send(
