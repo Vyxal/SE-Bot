@@ -1,6 +1,8 @@
+import crypto from "crypto";
 import express from "express";
 import bodyparser from "body-parser";
 import http from "http";
+import config from "./config.js";
 
 const app = express();
 
@@ -11,6 +13,12 @@ app.use(bodyparser.json());
 app.use(bodyparser.raw());
 
 app.use((req, res, next) => {
+    console.log(req.body);
+    return;
+
+    const hmac = crypto.createHmac("sha256", config.github_secret);
+    const data = hmac.update(req.body);
+
     console.log(req.headers);
     next();
 });
