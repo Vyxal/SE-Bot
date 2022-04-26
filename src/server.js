@@ -1,5 +1,5 @@
+import crypto from "crypto";
 import express from "express";
-import expressVerifyHmacSignature from "express-verify-hmac-signature";
 import bodyparser from "body-parser";
 import http from "http";
 import config from "./config.js";
@@ -12,21 +12,13 @@ app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use(bodyparser.raw());
 
-app.use(
-    expressVerifyHmacSignature({
-        algorithm: "sha256",
-        secret: config.github_secret,
-        getDigest: (req) => req.headers["x-hub-signature-256"],
-        getBody: (req) => (req.body ? JSON.stringify(req.body) : undefined),
-        encoding: "base64",
-        onFailure: (req, res, _next) => {
-            console.log(req.headers["x-hub-signature-256"]);
-            console.log(req.body);
-            console.log("Invalid webhook signature.");
-            res.sendStatus(404);
-        },
-    })
-);
+app.use((req, res, next) => {
+    const hmac = crypto.createHmac("sha256", config.github_secret);
+    const data = hmac.update(JSON.stringify(req.body));
+    const hex = data.digest("hex");
+
+    console.log(hex);
+});
 
 app.get("/fork", (req, res) => {
     console.log(req.body);
