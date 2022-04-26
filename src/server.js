@@ -29,14 +29,12 @@ app.use((req, _, next) => {
 });
 
 app.post("/fork", (req, res) => {
-    console.log(req.data);
-
-    if (req.data.repository.private) return;
+    if (req.body.repository.private) return;
 
     client.room.send(
-        `${linkUser(req.data.sender.login)} forked ${linkRepo(
-            req.data.repository
-        )} into ${linkRepo(req.data.forkee)}`
+        `${linkUser(req.body.sender.login)} forked ${linkRepo(
+            req.body.repository
+        )} into ${linkRepo(req.body.forkee)}`
     );
 });
 
