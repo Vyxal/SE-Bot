@@ -8,6 +8,7 @@ const app = express();
 
 export default app;
 
+app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.raw());
 
 app.use((req, res, next) => {
@@ -24,9 +25,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
-app.use(bodyparser.raw());
 
 app.get("/fork", (req, res) => {
     console.log(req.body);
