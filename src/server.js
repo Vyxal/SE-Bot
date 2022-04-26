@@ -4,7 +4,7 @@ import bodyparser from "body-parser";
 import http from "http";
 import config from "./config.js";
 import client from "./client.js";
-import { linkRepo, linkUser } from "./format.js";
+import { linkRef, linkRepo, linkUser } from "./format.js";
 
 const app = express();
 
@@ -22,7 +22,7 @@ app.use((req, _, next) => {
     const hex = data.digest("hex");
 
     if (hex != req.headers["x-hub-signature-256"].slice(7)) {
-        return req.sendStatus(201);
+        return res.sendStatus(201);
     }
 
     next();
@@ -30,13 +30,22 @@ app.use((req, _, next) => {
 
 app.use((req, _, next) => {
     if (!req?.body?.repository || req.body.repository.private) {
-        return req.sendStatus(201);
+        return res.sendStatus(201);
     }
 
     next();
 });
 
-app.post("/branch-tag-created", (req, _) => {});
+app.post("/branch-tag-created", (req, _) => {
+    if (req.body.ref_type == "branch") {
+        client.room.send(
+            `${linkUser(data.sender.login)} created branch ${linkRef(
+                data.ref,
+                data
+            )}`
+        );
+    }
+});
 
 app.post("/fork", (req, _) => {
     client.room.send(
