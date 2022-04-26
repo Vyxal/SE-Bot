@@ -39,9 +39,9 @@ app.use((req, _, next) => {
 app.post("/branch-tag-created", (req, _) => {
     if (req.body.ref_type == "branch") {
         client.room.send(
-            `${linkUser(data.sender.login)} created branch ${linkRef(
-                data.ref,
-                data
+            `${linkUser(req.body.sender.login)} created branch ${linkRef(
+                req.body.ref,
+                req.body
             )}`
         );
     }
