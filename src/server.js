@@ -19,7 +19,9 @@ app.use(
         getDigest: (req) => req.headers["x-hub-signature-256"],
         getBody: (req) => (req.body ? JSON.stringify(req.body) : undefined),
         encoding: "base64",
-        onFailure: (_req, res, _next) => {
+        onFailure: (req, res, _next) => {
+            console.log(req.headers["x-hub-signature-256"]);
+            console.log(req.body);
             console.log("Invalid webhook signature.");
             res.sendStatus(404);
         },
