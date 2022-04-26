@@ -17,8 +17,7 @@ app.use((req, res, next) => {
     const data = hmac.update(JSON.stringify(req.body));
     const hex = data.digest("hex");
 
-    console.log(req.headers["x-hub-signature-256"]);
-    console.log(hex);
+    console.log(hex == req.headers["x-hub-signature-256"].slice(7));
 });
 
 app.get("/fork", (req, res) => {
