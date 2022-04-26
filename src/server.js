@@ -12,12 +12,16 @@ app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use(bodyparser.raw());
 
-app.use((req, res, next) => {
+app.use((req, _, next) => {
     const hmac = crypto.createHmac("sha256", config.github_secret);
     const data = hmac.update(JSON.stringify(req.body));
     const hex = data.digest("hex");
 
-    console.log(hex == req.headers["x-hub-signature-256"].slice(7));
+    if (hex == req.headers["x-hub-signature-256"].slice(7)) {
+        next();
+    } else {
+        req.sendStatus(201);
+    }
 });
 
 app.get("/fork", (req, res) => {
