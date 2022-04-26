@@ -18,15 +18,13 @@ app.use((req, _, next) => {
     const hex = data.digest("hex");
 
     if (hex == req.headers["x-hub-signature-256"].slice(7)) {
-        console.log("Valid; continuing.");
         next();
     } else {
-        console.log("Invalid; stopping.");
         req.sendStatus(201);
     }
 });
 
-app.get("/fork", (req, res) => {
+app.post("/fork", (req, res) => {
     console.log(req.body);
 });
 
