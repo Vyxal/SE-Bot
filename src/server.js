@@ -21,21 +21,31 @@ app.use((req, _, next) => {
     const data = hmac.update(JSON.stringify(req.body));
     const hex = data.digest("hex");
 
-    if (hex == req.headers["x-hub-signature-256"].slice(7)) {
-        next();
-    } else {
-        req.sendStatus(201);
+    if (hex != req.headers["x-hub-signature-256"].slice(7)) {
+        return req.sendStatus(201);
     }
+
+    next();
 });
 
-app.post("/fork", (req, res) => {
-    if (req.body.repository.private) return;
+app.use((req, _, next) => {
+    if (!req?.body?.repository || req.body.repository.private) {
+        return req.sendStatus(201);
+    }
 
+    next();
+});
+
+app.post("/branch-tag-created", (req, _) => {});
+
+app.post("/fork", (req, _) => {
     client.room.send(
         `${linkUser(req.body.sender.login)} forked ${linkRepo(
             req.body.repository
         )} into ${linkRepo(req.body.forkee)}`
     );
 });
+
+app.use((_, res) => res.sendStatus(200));
 
 http.createServer(app).listen(parseInt(process.argv[2]) || 5666);
