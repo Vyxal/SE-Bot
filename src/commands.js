@@ -1,4 +1,3 @@
-import he from "he";
 import moment from "moment";
 import fetch from "node-fetch";
 import config from "./config.js";
@@ -220,33 +219,32 @@ export default {
         }
     },
 
-    _: async (_, reply, message, edited) => {
+    _: async (content, reply, message, edited) => {
         let match;
 
         const client = message.client;
-        const content = he.decode(message.content);
 
         if (
             content.match(
-                /^!!\/\s*(status|((lol )?(yo)?u good( (there )?(my )?(epic )?(bro|dude|sis|buddy|mate|m8|gamer)?)?\?*))\s*$/i
+                /^(status|((lol )?(yo)?u good( (there )?(my )?(epic )?(bro|dude|sis|buddy|mate|m8|gamer)?)?\?*))$/i
             )
         ) {
             return `${reply}I am doing ${choice(responses.STATUSES)}.`;
         } else if (
             content.match(
-                /^!!\/\s*(info|inf(ro|or)(mate?ion)?|wh?at( i[sz]|'s)? vyxal|what vyxal i[sz])\?*\s*$/i
+                /^(info|inf(ro|or)(mate?ion)?|wh?at( i[sz]|'s)? vyxal|what vyxal i[sz])\?*$/i
             )
         ) {
             return reply + responses.INFOTEXT;
         } else if (
             content.match(
-                /^!!\/\s*(w(h(o|y|at)|ut) (are|r) (you|yuo|yoo|u)(, you .+?)?\?*|h[ea]lp( pl[sz])?)\s*$/i
+                /^(w(h(o|y|at)|ut) (are|r) (you|yuo|yoo|u)(, you .+?)?\?*|h[ea]lp( pl[sz])?)$/i
             )
         ) {
             return reply + responses.HELPTEXT;
         } else if (
             content.match(
-                /^!!\/\s*(pl(ease|[sz]) )?(make|let|have) velociraptors maul (.+?)\s*$/i
+                /^(pl(ease|[sz]) )?(make|let|have) velociraptors maul (.+?)$/i
             )
         ) {
             return `
@@ -275,7 +273,7 @@ export default {
             `;
         } else if (
             (match = content.match(
-                /^!!\/\s*(coffee|(make|brew)( a cup of)? coffee for) (.+?)\s*$/i
+                /^(coffee|(make|brew)( a cup of)? coffee for) (.+?)$/i
             ))
         ) {
             return `${reply}_brews a cup of coffee for @${match[4].replaceAll(
@@ -283,9 +281,7 @@ export default {
                 ""
             )}_`;
         } else if (
-            content.match(
-                /^!!\/\s*(sudo |pl(s|z|ease?) )?make? meh? (a )?coo?kie?\s*$/i
-            )
+            content.match(/^(sudo |pl(s|z|ease?) )?make? meh? (a )?coo?kie?$/i)
         ) {
             if (content.indexOf("sudo") != -1) {
                 if (await client.isAdmin(message.user_id)) {
@@ -300,13 +296,13 @@ export default {
                     return reply + "No.";
                 }
             }
-        } else if (content.match(/^!!\/\s*ping me\s*$/i)) {
+        } else if (content.match(/^ping me$/i)) {
             await client.setPing(message.user_id, true);
             return reply + "I have put you on the ping list.";
-        } else if (content.match(/^!!\/\s*(don't ping|pingn't) me\s*$/i)) {
+        } else if (content.match(/^(don't ping|pingn't) me$/i)) {
             await client.setPing(message.user_id, false);
             return reply + "I have removed you from the ping list.";
-        } else if (content.match(/^!!\/\s*am ?i ?privileged\?*\s*$/i)) {
+        } else if (content.match(/^am ?i ?privileged\?*$/i)) {
             if (await client.isOwner(message.user_id)) {
                 return reply + "You are a bot owner.";
             } else if (await client.isAdmin(message.user_id)) {
@@ -322,7 +318,7 @@ export default {
                     )
                 );
             }
-        } else if (content.match(/^!!\/\s*(update )?prod(uction)?\s*$/i)) {
+        } else if (content.match(/^(update )?prod(uction)?$/i)) {
             if (!(await client.isPrivileged(message.user_id))) {
                 return (
                     reply +
@@ -363,21 +359,17 @@ export default {
                     ).replaceAll("MESSAGE", ans)
                 ).substring(0, 500);
             }
-        } else if (
-            content.match(/^!!\/\s*(hello|howdy|mornin['g]|evenin['g])\s*$/i)
-        ) {
+        } else if (content.match(/^(hello|howdy|mornin['g]|evenin['g])$/i)) {
             return reply + "Hello to you too!";
-        } else if (
-            content.match(/^!!\/\s*((good)?bye|see ya\!?|(good|')night)\s*$/i)
-        ) {
+        } else if (content.match(/^((good)?bye|see ya\!?|(good|')night)$/i)) {
             return reply + "o/";
-        } else if (content.match(/^!!\/\s*flowey quote\s*$/i)) {
+        } else if (content.match(/^flowey quote$/i)) {
             return reply + choice(responses.FLOWEY_QUOTES);
-        } else if (content.match(/^!!\/\s*hug\s*$/i)) {
+        } else if (content.match(/^hug$/i)) {
             return reply + choice(responses.HUGS);
-        } else if (content.match(/^!!\/\s*sus\s*$/i)) {
+        } else if (content.match(/^sus$/i)) {
             return reply + "ඞ";
-        } else if (content.match(/^!!\/\s*repo(sitor(y|ies))? list\s*$/i)) {
+        } else if (content.match(/^repo(sitor(y|ies))? list$/i)) {
             const res = await gitRequest("/orgs/Vyxal/repos");
 
             if (res.status == 200) {

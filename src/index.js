@@ -1,8 +1,10 @@
+import he from "he";
+
 import client from "./client.js";
 import commands from "./commands.js";
 import config from "./config.js";
 
-import server from "./server.js";
+import _ from "./server.js";
 
 process.on("uncaughtException", (error) => console.error(error.stack ?? error));
 
@@ -15,15 +17,24 @@ const replies = new Map();
 async function getResponse(message, edited) {
     if ((message.target_user_id ?? message.user_id) == client.userId) return;
 
-    if (message.content.startsWith("!!/")) {
-        const remainder = message.content.substring(3).trim();
+    const match = he
+        .decode(message.content)
+        .match(/^(!!\/|@vyx(a(l(b(ot?)?)?)?)?\s)\s*(.+)\s*$/i);
+
+    if (match) {
+        const remainder = match[6].trim();
         const command = remainder.split(/\s/)[0];
         const args = remainder.substring(command.length).trim();
 
         const fn = commands[command] ?? commands._;
 
         if (fn) {
-            return await fn(args, `:${message.message_id} `, message, edited);
+            return await fn(
+                commands[command] ? args : remainder,
+                `:${message.message_id} `,
+                message,
+                edited
+            );
         }
     }
 }
