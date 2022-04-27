@@ -113,6 +113,8 @@ function unparse(node) {
                 return `\`\`\`\n${inner}\n\`\`\``;
             case "a":
                 return `[${inner}](<${node.getAttribute("href")}>)`;
+            case "br":
+                return "\n";
         }
 
         return inner;
