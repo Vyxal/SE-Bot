@@ -83,7 +83,7 @@ function unparse(node) {
         return "https:" + node.querySelector("a").getAttribute("href");
     }
 
-    if (node.querySelector(".full")) {
+    if (node.querySelector("br")) {
         return node
             .querySelector(".full")
             .innerHTML.replaceAll(/\s*<\/?\s*br\s*>\s*/g, "\n");
