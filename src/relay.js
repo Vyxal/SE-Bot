@@ -83,8 +83,10 @@ function unparse(node) {
         return "https:" + node.querySelector("a").getAttribute("href");
     }
 
-    if (node.querySelector("br")) {
-        return node.innerHTML.replaceAll(/\s*<\/?\s*br\s*>\s*/g, "\n");
+    if (node.querySelector(".full")) {
+        return node
+            .querySelector(".full")
+            .innerHTML.replaceAll(/\s*<\/?\s*br\s*>\s*/g, "\n");
     }
 
     if (node.nodeType == 1) {
