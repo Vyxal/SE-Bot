@@ -70,28 +70,28 @@ function translate(message) {
 }
 
 function unparse(node) {
-    if (node.nodeType == 3)
+    if (node.nodeType == 3) {
         return he
             .decode(node._rawText)
             .replaceAll("`", "\\`")
             .replaceAll("*", "\\*")
             .replaceAll("_", "\\_")
             .replaceAll("~", "\\~");
+    }
 
     if (node.querySelector(".onebox.ob-image")) {
         return "https:" + node.querySelector("a").getAttribute("href");
+    }
+
+    if (node.querySelector("br")) {
+        return node.innerHTML.replaceAll(/<\/?\s*br\s*>/, "\n");
     }
 
     if (node.nodeType == 1) {
         let inner =
             node.rawTagName == "code" || node.rawTagName == "pre"
                 ? he.decode(node.childNodes[0]._rawText)
-                : node.childNodes
-                      .map(unparse)
-                      .join("")
-                      .split("\n")
-                      .map((x) => x.trim())
-                      .join("\n");
+                : node.childNodes.map(unparse).join("");
 
         switch (node.rawTagName) {
             case "b":
