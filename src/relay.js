@@ -65,6 +65,15 @@ client.on("messageDelete", async (_, message) => {
     });
 });
 
+client.on("messageMoveOut", async (message) => {
+    const id = await getRelayMessage(message.message_id);
+    if (!id) return;
+
+    await fetch(config.discord_webhook + "/messages/" + id, {
+        method: "DELETE",
+    });
+});
+
 function translate(message) {
     return unparse(parse(message.content));
 }
