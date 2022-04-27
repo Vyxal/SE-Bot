@@ -86,7 +86,12 @@ function unparse(node) {
         let inner =
             node.rawTagName == "code" || node.rawTagName == "pre"
                 ? he.decode(node.childNodes[0]._rawText)
-                : node.childNodes.map(unparse).join("");
+                : node.childNodes
+                      .map(unparse)
+                      .join("")
+                      .split("\n")
+                      .map((x) => x.trim())
+                      .join("\n");
 
         switch (node.rawTagName) {
             case "b":
