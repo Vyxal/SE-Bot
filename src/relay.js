@@ -113,6 +113,8 @@ function unparse(node) {
                     inner = inner.replaceAll("``", "``\u200b");
                 }
                 return `\`\`\`\n${inner}\n\`\`\``;
+            case "a":
+                return `[${inner}](${node.getAttribute("href")})`;
         }
 
         return inner;
