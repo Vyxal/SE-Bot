@@ -66,8 +66,6 @@ client.on("messageDelete", async (_, message) => {
 });
 
 function translate(message) {
-    console.log(message.content);
-
     return unparse(parse(message.content));
 }
 
