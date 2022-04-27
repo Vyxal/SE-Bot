@@ -84,7 +84,7 @@ function unparse(node) {
     }
 
     if (node.querySelector("br")) {
-        return node.innerHTML.replaceAll(/<\/?\s*br\s*>/, "\n");
+        return node.innerHTML.replaceAll(/\s*<\/?\s*br\s*>\s*/g, "\n");
     }
 
     if (node.nodeType == 1) {
