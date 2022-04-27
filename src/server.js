@@ -274,7 +274,7 @@ app.post("/vulnerability", (req, res) => {
 
 let lastRelease = null;
 
-const primary = new Set(["Vyxal/Sandbox"]);
+const primary = new Set(["Vyxal/Vyxal"]);
 const secondary = new Set(["Vyxal/Jyxal"]);
 
 http.createServer(app).listen(parseInt(process.argv[2]) || 5666);
