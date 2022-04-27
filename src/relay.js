@@ -19,6 +19,14 @@ async function createRelayMessage(se, dc) {
 }
 
 client.on("messageCreate", async (message) => {
+    if (message.room_id != message.client.room.id) return;
+    if (
+        message.user_id == message.client.userId &&
+        message.content.startsWith("<div class='full'>[Discord Relay]")
+    ) {
+        return;
+    }
+
     const { avatar } = await client.fetchUser(message.user_id);
 
     const res = await fetch(config.discord_webhook + "?wait=true", {

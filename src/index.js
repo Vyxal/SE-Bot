@@ -6,6 +6,7 @@ import config from "./config.js";
 
 import _server from "./server.js";
 import _relay from "./relay.js";
+import _relay2 from "./relay2.js";
 
 process.on("uncaughtException", (error) => console.error(error.stack ?? error));
 
