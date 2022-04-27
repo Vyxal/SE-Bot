@@ -194,10 +194,8 @@ app.post("/release", (req, res) => {
             }`
         )
         .then((messageId) => {
-            console.log(primary, name, messageId);
-
             if (primary.has(name)) {
-                client.room.pinMessage(messageId).then(console.log);
+                client.room.pinMessage(messageId);
             }
         });
 
