@@ -4,7 +4,8 @@ import client from "./client.js";
 import commands from "./commands.js";
 import config from "./config.js";
 
-import _ from "./server.js";
+import _server from "./server.js";
+import _relay from "./relay.js";
 
 process.on("uncaughtException", (error) => console.error(error.stack ?? error));
 
