@@ -6,6 +6,7 @@ import config from "./config.js";
 import client from "./client.js";
 import {
     linkDiscussion,
+    linkIssue,
     linkPullRequest,
     linkRef,
     linkRepo,
