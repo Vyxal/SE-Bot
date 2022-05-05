@@ -107,7 +107,7 @@ app.post("/issue", (req, res) => {
         case "reopened":
         case "deleted":
             client.room.send(
-                `${linkUser(req.body.sender.login)} opened ${
+                `${linkUser(req.body.sender.login)} ${req.body.action} ${
                     req.body.action == "deleted"
                         ? `issue #${req.body.issue.number}`
                         : linkIssue(req.body.issue, false)
