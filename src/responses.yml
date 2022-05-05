@@ -115,7 +115,7 @@ STATUSES:
     - your dad
     - hyper's homework
     - schoolwork
-    - stupidly.
+    - stupidly
     - therefore I am
     - breathing
     - existing
@@ -138,7 +138,7 @@ STATUSES:
     - quietly
     - poorly
     - tax evasion
-    - 
+    - cookie related stuff
 NOT_PRIVILEGED: >-
     You are not a privileged user. If you believe this is a mistake, please ask an admin to grant you permissions.
     [`!!/promote USER_ID`]
