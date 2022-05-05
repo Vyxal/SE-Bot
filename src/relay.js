@@ -52,10 +52,18 @@ client.on("messageUpdate", async (_, message) => {
     const id = await getRelayMessage(message.message_id);
     if (!id) return;
 
+    let content;
+
+    try {
+        content = translate(message);
+    } catch {
+        return;
+    }
+
     await fetch(config.discord_webhook + "/messages/" + id, {
         method: "PATCH",
         body: JSON.stringify({
-            content: translate(message),
+            content,
             allowed_mentions: { parse: [] },
         }),
         headers: {
