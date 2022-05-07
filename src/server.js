@@ -220,13 +220,68 @@ app.post("/pull-request", (req, res) => {
         const subres = await gitRequest(`/repos/Vyxal/${repo}/issues`, {
             method: "GET",
             body: JSON.stringify({
-                title,
-                body: `${body}\n\n(created by ${message.user_name} [here](${message.transcript_link}))`,
-                labels,
+                number: issue_number
             }),
         });
 
+        if (subres.status != 200){
+            return res.sendStatus(201);
+        }
+    
+        // If we get here, we know that the issue exists.
+        // We can now get the issue labels.
 
+        const issue = JSON.parse(subres.body);
+        let labels = issue.labels;
+        
+        // Then, get the names of the labels
+        var label_names = [];
+        for (let i = 0; i < labels.length; i++){
+            label_names.push(labels[i].name);
+        }
+
+        // Now, swap those out for the PR versions
+
+        // (bug) -> (Bug Fix)
+        // (documentation) -> (Documentation Fix)
+        // (element request) -> (Element Implementation)
+        // (enhancement) -> (Enhancement PR)
+        // (difficulty: very hard) -> (Careful Review Required)
+
+        label_names = label_names.map(label => {
+            switch (label){
+                case "bug":
+                    return "Bug Fix";
+                case "documentation":
+                    return "Documentation Fix";
+                case "element request":
+                    return "Element Implementation";
+                case "enhancement":
+                    return "Enhancement PR";
+                case "difficulty: very hard":
+                    return "Careful Review Required";
+                default:
+                    return "";
+            }
+        });
+
+        // Filter out any empty strings
+        label_names = label_names.filter(label => label != "");
+
+        // Now, add the labels to the PR
+        const subres2 = await gitRequest(`/repos/Vyxal/${repo}/issues/${issue_number}/labels`, {
+            method: "POST",
+            body: JSON.stringify({
+                labels: label_names
+            }),
+        });
+
+        if (subres2.status != 201){
+            return res.sendStatus(201);
+        }
+
+        // And hey presto - automagic PR labelling based on linked issues.
+        // ain't that nifty?
     }
 
     res.sendStatus(201);
