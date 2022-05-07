@@ -145,6 +145,7 @@ app.post("/pr-review", (req, res) => {
                 }`
             )
         );
+
     }
 
     res.sendStatus(201);
@@ -175,6 +176,58 @@ app.post("/pull-request", (req, res) => {
             }): _${msgify(pr.title)}_`
         )
     );
+
+    if (action_text == "opened"){
+        // If there is an attached issue, then we want to add the
+        // corresponding label (if it exists) to the PR.
+
+        // First of all, make sure that the repository is Vyxal/Vyxal
+
+        if (pr.base.repo.full_name != "Vyxal/Vyxal"){
+            return res.sendStatus(201);
+        }
+
+        // Next, make sure the PR doesn't already have labels. If there
+        // are labels already, that means that the author has added
+        // labels themselves.
+
+        if (pr.labels.length > 0){
+            return res.sendStatus(201);
+        }
+
+        // Now, see if there is a linked issue.
+        // We test to see if the issue is linked by checking if there are
+        // closing keywords
+
+        let pr_body = pr.body;
+
+        if (!pr_body){
+            return res.sendStatus(201);
+        }
+
+        let containsIssue = pr_body.match(/([Cc]lose[sd]?|[Ff]ixe[sd]) #(\d+)/);
+        if (!containsIssue){
+            return res.sendStatus(201);
+        }
+
+        // If we get here, we know that the PR has an issue linked to it.
+        // We can now get the issue number.
+
+        let issue_number = containsIssue[2];
+
+        // Check if the issue exists in the Vyxal repo
+
+        const subres = await gitRequest(`/repos/Vyxal/${repo}/issues`, {
+            method: "GET",
+            body: JSON.stringify({
+                title,
+                body: `${body}\n\n(created by ${message.user_name} [here](${message.transcript_link}))`,
+                labels,
+            }),
+        });
+
+
+    }
 
     res.sendStatus(201);
 });
@@ -277,5 +330,16 @@ let lastRelease = null;
 
 const primary = new Set(["Vyxal/Vyxal"]);
 const secondary = new Set(["Vyxal/Jyxal"]);
+
+async function gitRequest(url, options) {
+    return await fetch("https://api.github.com" + url, {
+        ...options,
+        headers: {
+            Authorization: "token " + config.github_token,
+            Accept: "application/vnd.github.v3+json",
+            "User-Agent": "Vyxal-Bot",
+        },
+    });
+}
 
 http.createServer(app).listen(parseInt(process.argv[2]) || 5666);
