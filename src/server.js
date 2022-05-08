@@ -233,6 +233,9 @@ app.post("/pull-request", async (req, res) => {
         // We can now get the issue labels.
 
         const issue = await subres.json();
+
+        console.log(issue);
+
         let labels = issue.labels;
 
         // Then, get the names of the labels
@@ -268,6 +271,8 @@ app.post("/pull-request", async (req, res) => {
 
         // Filter out any empty strings
         label_names = label_names.filter((label) => label != "");
+
+        console.log(label_names);
 
         // Now, add the labels to the PR
         const subres2 = await gitRequest(
