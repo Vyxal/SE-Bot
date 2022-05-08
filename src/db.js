@@ -8,7 +8,7 @@ db.client = db_client;
 await db.client.connect();
 
 db.init = async function (name) {
-    db[name] = db.collection(name);
+  db[name] = db.collection(name);
 };
 
 export default db;
