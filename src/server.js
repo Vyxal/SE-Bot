@@ -177,7 +177,7 @@ app.post("/pull-request", async (req, res) => {
         )
     );
 
-    if (action_text == "opened" || action_test == "reopened") {
+    if (action_text == "opened" || action_text == "reopened") {
         // If there is an attached issue, then we want to add the
         // corresponding label (if it exists) to the PR.
 
