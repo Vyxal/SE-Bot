@@ -177,7 +177,7 @@ app.post("/pull-request", async (req, res) => {
         )
     );
 
-    if (action_text == "opened" || action_text == "reopened") {
+    if (action_text == "opened") {
         // If there is an attached issue, then we want to add the
         // corresponding label (if it exists) to the PR.
 
@@ -225,7 +225,6 @@ app.post("/pull-request", async (req, res) => {
         );
 
         if (subres.status != 200) {
-            console.log(subres.status, await subres.text());
             return res.sendStatus(201);
         }
 
@@ -233,9 +232,6 @@ app.post("/pull-request", async (req, res) => {
         // We can now get the issue labels.
 
         const issue = await subres.json();
-
-        console.log(issue);
-
         let labels = issue.labels;
 
         // Then, get the names of the labels
@@ -273,8 +269,6 @@ app.post("/pull-request", async (req, res) => {
         label_names = label_names.filter((label) => label != "");
 
         if (label_names.length > 0) {
-            console.log(label_names);
-
             // Now, add the labels to the PR
             const subres2 = await gitRequest(
                 `/repos/${pr.base.repo.full_name}/issues/${pr.number}/labels`,
@@ -285,8 +279,6 @@ app.post("/pull-request", async (req, res) => {
                     }),
                 }
             );
-
-            console.log(subres2.status, await subres2.json());
 
             if (subres2.status != 201) {
                 return res.sendStatus(201);
