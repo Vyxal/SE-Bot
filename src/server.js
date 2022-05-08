@@ -285,6 +285,8 @@ app.post("/pull-request", async (req, res) => {
             }
         );
 
+        console.log(subres2.status, await subres2.json());
+
         if (subres2.status != 201) {
             return res.sendStatus(201);
         }
