@@ -128,7 +128,7 @@ app.post("/pr-review", (req, res) => {
 
         if (review.state == "commented") {
             if (!review.body) return res.sendStatus(201);
-            action_text == "commented";
+            action_text = "commented";
         } else if (review.state == "approved") {
             action_text = "approved";
         } else if (review.state == "changes_requested") {
