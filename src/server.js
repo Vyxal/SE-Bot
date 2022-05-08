@@ -218,25 +218,21 @@ app.post("/pull-request", async (req, res) => {
         // Check if the issue exists in the Vyxal repo
 
         const subres = await gitRequest(
-            `/repos/${pr.base.repo.full_name}/issues`,
+            `/repos/${pr.base.repo.full_name}/issues/${issue_number}`,
             {
-                method: "POST",
-                body: JSON.stringify({
-                    number: issue_number,
-                }),
+                method: "GET",
             }
         );
 
-        console.log(subres.status, await subres.text());
-
         if (subres.status != 200) {
+            console.log(subres.status, await subres.text());
             return res.sendStatus(201);
         }
 
         // If we get here, we know that the issue exists.
         // We can now get the issue labels.
 
-        const issue = JSON.parse(subres.body);
+        const issue = await subres.json();
         let labels = issue.labels;
 
         // Then, get the names of the labels
