@@ -2,6 +2,7 @@ import crypto from "crypto";
 import express from "express";
 import bodyparser from "body-parser";
 import http from "http";
+import fetch from "node-fetch";
 import config from "./config.js";
 import client from "./client.js";
 import {
