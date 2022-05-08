@@ -145,13 +145,12 @@ app.post("/pr-review", (req, res) => {
                 }`
             )
         );
-
     }
 
     res.sendStatus(201);
 });
 
-app.post("/pull-request", (req, res) => {
+app.post("/pull-request", async (req, res) => {
     let action_text = req.body.action;
     const pr = req.body.pull_request;
 
@@ -177,13 +176,13 @@ app.post("/pull-request", (req, res) => {
         )
     );
 
-    if (action_text == "opened"){
+    if (action_text == "opened") {
         // If there is an attached issue, then we want to add the
         // corresponding label (if it exists) to the PR.
 
         // First of all, make sure that the repository is Vyxal/Vyxal
 
-        if (pr.base.repo.full_name != "Vyxal/Vyxal"){
+        if (pr.base.repo.full_name != "Vyxal/Vyxal") {
             return res.sendStatus(201);
         }
 
@@ -191,7 +190,7 @@ app.post("/pull-request", (req, res) => {
         // are labels already, that means that the author has added
         // labels themselves.
 
-        if (pr.labels.length > 0){
+        if (pr.labels.length > 0) {
             return res.sendStatus(201);
         }
 
@@ -201,12 +200,12 @@ app.post("/pull-request", (req, res) => {
 
         let pr_body = pr.body;
 
-        if (!pr_body){
+        if (!pr_body) {
             return res.sendStatus(201);
         }
 
         let containsIssue = pr_body.match(/([Cc]lose[sd]?|[Ff]ixe[sd]) #(\d+)/);
-        if (!containsIssue){
+        if (!containsIssue) {
             return res.sendStatus(201);
         }
 
@@ -220,23 +219,23 @@ app.post("/pull-request", (req, res) => {
         const subres = await gitRequest(`/repos/Vyxal/${repo}/issues`, {
             method: "GET",
             body: JSON.stringify({
-                number: issue_number
+                number: issue_number,
             }),
         });
 
-        if (subres.status != 200){
+        if (subres.status != 200) {
             return res.sendStatus(201);
         }
-    
+
         // If we get here, we know that the issue exists.
         // We can now get the issue labels.
 
         const issue = JSON.parse(subres.body);
         let labels = issue.labels;
-        
+
         // Then, get the names of the labels
         var label_names = [];
-        for (let i = 0; i < labels.length; i++){
+        for (let i = 0; i < labels.length; i++) {
             label_names.push(labels[i].name);
         }
 
@@ -248,8 +247,8 @@ app.post("/pull-request", (req, res) => {
         // (enhancement) -> (Enhancement PR)
         // (difficulty: very hard) -> (Careful Review Required)
 
-        label_names = label_names.map(label => {
-            switch (label){
+        label_names = label_names.map((label) => {
+            switch (label) {
                 case "bug":
                     return "Bug Fix";
                 case "documentation":
@@ -266,17 +265,20 @@ app.post("/pull-request", (req, res) => {
         });
 
         // Filter out any empty strings
-        label_names = label_names.filter(label => label != "");
+        label_names = label_names.filter((label) => label != "");
 
         // Now, add the labels to the PR
-        const subres2 = await gitRequest(`/repos/Vyxal/${repo}/issues/${issue_number}/labels`, {
-            method: "POST",
-            body: JSON.stringify({
-                labels: label_names
-            }),
-        });
+        const subres2 = await gitRequest(
+            `/repos/Vyxal/${repo}/issues/${issue_number}/labels`,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    labels: label_names,
+                }),
+            }
+        );
 
-        if (subres2.status != 201){
+        if (subres2.status != 201) {
             return res.sendStatus(201);
         }
 
