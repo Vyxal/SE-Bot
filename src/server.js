@@ -145,6 +145,7 @@ app.post("/pr-review", (req, res) => {
                 }`
             )
         );
+
     }
 
     res.sendStatus(201);
@@ -175,6 +176,113 @@ app.post("/pull-request", (req, res) => {
             }): _${msgify(pr.title)}_`
         )
     );
+
+    if (action_text == "opened"){
+        // If there is an attached issue, then we want to add the
+        // corresponding label (if it exists) to the PR.
+
+        // First of all, make sure that the repository is Vyxal/Vyxal
+
+        if (pr.base.repo.full_name != "Vyxal/Vyxal"){
+            return res.sendStatus(201);
+        }
+
+        // Next, make sure the PR doesn't already have labels. If there
+        // are labels already, that means that the author has added
+        // labels themselves.
+
+        if (pr.labels.length > 0){
+            return res.sendStatus(201);
+        }
+
+        // Now, see if there is a linked issue.
+        // We test to see if the issue is linked by checking if there are
+        // closing keywords
+
+        let pr_body = pr.body;
+
+        if (!pr_body){
+            return res.sendStatus(201);
+        }
+
+        let containsIssue = pr_body.match(/([Cc]lose[sd]?|[Ff]ixe[sd]) #(\d+)/);
+        if (!containsIssue){
+            return res.sendStatus(201);
+        }
+
+        // If we get here, we know that the PR has an issue linked to it.
+        // We can now get the issue number.
+
+        let issue_number = containsIssue[2];
+
+        // Check if the issue exists in the Vyxal repo
+
+        const subres = await gitRequest(`/repos/Vyxal/${repo}/issues`, {
+            method: "GET",
+            body: JSON.stringify({
+                number: issue_number
+            }),
+        });
+
+        if (subres.status != 200){
+            return res.sendStatus(201);
+        }
+    
+        // If we get here, we know that the issue exists.
+        // We can now get the issue labels.
+
+        const issue = JSON.parse(subres.body);
+        let labels = issue.labels;
+        
+        // Then, get the names of the labels
+        var label_names = [];
+        for (let i = 0; i < labels.length; i++){
+            label_names.push(labels[i].name);
+        }
+
+        // Now, swap those out for the PR versions
+
+        // (bug) -> (Bug Fix)
+        // (documentation) -> (Documentation Fix)
+        // (element request) -> (Element Implementation)
+        // (enhancement) -> (Enhancement PR)
+        // (difficulty: very hard) -> (Careful Review Required)
+
+        label_names = label_names.map(label => {
+            switch (label){
+                case "bug":
+                    return "Bug Fix";
+                case "documentation":
+                    return "Documentation Fix";
+                case "element request":
+                    return "Element Implementation";
+                case "enhancement":
+                    return "Enhancement PR";
+                case "difficulty: very hard":
+                    return "Careful Review Required";
+                default:
+                    return "";
+            }
+        });
+
+        // Filter out any empty strings
+        label_names = label_names.filter(label => label != "");
+
+        // Now, add the labels to the PR
+        const subres2 = await gitRequest(`/repos/Vyxal/${repo}/issues/${issue_number}/labels`, {
+            method: "POST",
+            body: JSON.stringify({
+                labels: label_names
+            }),
+        });
+
+        if (subres2.status != 201){
+            return res.sendStatus(201);
+        }
+
+        // And hey presto - automagic PR labelling based on linked issues.
+        // ain't that nifty?
+    }
 
     res.sendStatus(201);
 });
@@ -277,5 +385,16 @@ let lastRelease = null;
 
 const primary = new Set(["Vyxal/Vyxal"]);
 const secondary = new Set(["Vyxal/Jyxal"]);
+
+async function gitRequest(url, options) {
+    return await fetch("https://api.github.com" + url, {
+        ...options,
+        headers: {
+            Authorization: "token " + config.github_token,
+            Accept: "application/vnd.github.v3+json",
+            "User-Agent": "Vyxal-Bot",
+        },
+    });
+}
 
 http.createServer(app).listen(parseInt(process.argv[2]) || 5666);
