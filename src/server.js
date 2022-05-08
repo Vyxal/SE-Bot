@@ -220,7 +220,7 @@ app.post("/pull-request", async (req, res) => {
         const subres = await gitRequest(
             `/repos/${pr.base.repo.full_name}/issues`,
             {
-                method: "GET",
+                method: "POST",
                 body: JSON.stringify({
                     number: issue_number,
                 }),
