@@ -218,7 +218,7 @@ app.post("/pull-request", async (req, res) => {
         // Check if the issue exists in the Vyxal repo
 
         const subres = await gitRequest(
-            `/repos/${pr.base.repo.full_name}/issues/${pr.number}`,
+            `/repos/${pr.base.repo.full_name}/issues/${issue_number}`,
             {
                 method: "GET",
             }
@@ -272,23 +272,25 @@ app.post("/pull-request", async (req, res) => {
         // Filter out any empty strings
         label_names = label_names.filter((label) => label != "");
 
-        console.log(label_names);
+        if (label_names.length > 0) {
+            console.log(label_names);
 
-        // Now, add the labels to the PR
-        const subres2 = await gitRequest(
-            `/repos/${pr.base.repo.full_name}/issues/${issue_number}/labels`,
-            {
-                method: "POST",
-                body: JSON.stringify({
-                    labels: label_names,
-                }),
+            // Now, add the labels to the PR
+            const subres2 = await gitRequest(
+                `/repos/${pr.base.repo.full_name}/issues/${pr.number}/labels`,
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        labels: label_names,
+                    }),
+                }
+            );
+
+            console.log(subres2.status, await subres2.json());
+
+            if (subres2.status != 201) {
+                return res.sendStatus(201);
             }
-        );
-
-        console.log(subres2.status, await subres2.json());
-
-        if (subres2.status != 201) {
-            return res.sendStatus(201);
         }
 
         // And hey presto - automagic PR labelling based on linked issues.
