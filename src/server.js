@@ -218,7 +218,7 @@ app.post("/pull-request", async (req, res) => {
         // Check if the issue exists in the Vyxal repo
 
         const subres = await gitRequest(
-            `/repos/${pr.base.repo.full_name}/issues/${issue_number}`,
+            `/repos/${pr.base.repo.full_name}/issues/${pr.number}`,
             {
                 method: "GET",
             }
