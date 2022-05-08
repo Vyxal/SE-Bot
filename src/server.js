@@ -247,6 +247,7 @@ app.post("/pull-request", async (req, res) => {
         // (element request) -> (Element Implementation)
         // (enhancement) -> (Enhancement PR)
         // (difficulty: very hard) -> (Careful Review Required)
+        // (priority: high) -> (Urgent Review Required)
 
         label_names = label_names.map((label) => {
             switch (label) {
@@ -260,6 +261,8 @@ app.post("/pull-request", async (req, res) => {
                     return "Enhancement PR";
                 case "difficulty: very hard":
                     return "Careful Review Required";
+                case "priority: high":
+                    return "Urgent Review Required"
                 default:
                     return "";
             }
