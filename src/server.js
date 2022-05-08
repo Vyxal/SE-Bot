@@ -227,6 +227,8 @@ app.post("/pull-request", async (req, res) => {
             }
         );
 
+        console.log(subres.status, await subres.text());
+
         if (subres.status != 200) {
             return res.sendStatus(201);
         }
@@ -273,7 +275,7 @@ app.post("/pull-request", async (req, res) => {
 
         // Now, add the labels to the PR
         const subres2 = await gitRequest(
-            `/repos/Vyxal/${repo}/issues/${issue_number}/labels`,
+            `/repos/${pr.base.repo.full_name}/issues/${issue_number}/labels`,
             {
                 method: "POST",
                 body: JSON.stringify({
