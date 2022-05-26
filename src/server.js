@@ -158,7 +158,8 @@ app.post("/pull-request", async (req, res) => {
   if (
     action_text != "opened" &&
     action_text != "closed" &&
-    action_text != "reopened"
+    action_text != "reopened" &&
+    action_text != "edited"
   ) {
     return res.sendStatus(201);
   }
@@ -167,15 +168,17 @@ app.post("/pull-request", async (req, res) => {
     action_text = "merged";
   }
 
-  client.room.send(
-    truncate(
-      `${linkUser(req.body.sender.login)} ${action_text} ${linkPullRequest(
-        pr
-      )} (${pr.head.label} → ${pr.base.label}): _${msgify(pr.title)}_`
-    )
-  );
+  if (action_text !== "edited") {
+    client.room.send(
+      truncate(
+        `${linkUser(req.body.sender.login)} ${action_text} ${linkPullRequest(
+          pr
+        )} (${pr.head.label} → ${pr.base.label}): _${msgify(pr.title)}_`
+      )
+    );
+  }
 
-  if (action_text == "opened") {
+  if (action_text == "opened" || action_text == "edited") {
     // If there is an attached issue, then we want to add the
     // corresponding label (if it exists) to the PR.
 
@@ -203,39 +206,38 @@ app.post("/pull-request", async (req, res) => {
       return res.sendStatus(201);
     }
 
-    let containsIssue = pr_body.match(/([Cc]lose[sd]?|[Ff]ixe[sd]) #(\d+)/);
+    let containsIssue = pr_body.match(/(close[sd]?|fixe?[sd]?|resolve[sd]?) #(\d+)/ig);
     if (!containsIssue) {
       return res.sendStatus(201);
     }
 
-    // If we get here, we know that the PR has an issue linked to it.
-    // We can now get the issue number.
+    const label_names = [];
+    for (const text of containsIssue) {
+      const issue_number = text.split('#')[1];
 
-    let issue_number = containsIssue[2];
+      // Check if the issue exists in the Vyxal repo
 
-    // Check if the issue exists in the Vyxal repo
+      const subres = await gitRequest(
+        `/repos/${pr.base.repo.full_name}/issues/${issue_number}`,
+        {
+          method: "GET",
+        }
+      );
 
-    const subres = await gitRequest(
-      `/repos/${pr.base.repo.full_name}/issues/${issue_number}`,
-      {
-        method: "GET",
+      if (subres.status != 200) {
+        return res.sendStatus(201);
       }
-    );
 
-    if (subres.status != 200) {
-      return res.sendStatus(201);
-    }
+      // If we get here, we know that the issue exists.
+      // We can now get the issue labels.
 
-    // If we get here, we know that the issue exists.
-    // We can now get the issue labels.
+      const issue = await subres.json();
+      const labels = issue.labels;
 
-    const issue = await subres.json();
-    let labels = issue.labels;
-
-    // Then, get the names of the labels
-    var label_names = [];
-    for (let i = 0; i < labels.length; i++) {
-      label_names.push(labels[i].name);
+      // Then, get the names of the labels
+      for (let i = 0; i < labels.length; i++) {
+        label_names.push(labels[i].name);
+      }
     }
 
     // Now, swap those out for the PR versions
@@ -266,8 +268,8 @@ app.post("/pull-request", async (req, res) => {
       }
     });
 
-    // Filter out any empty strings
-    label_names = label_names.filter((label) => label != "");
+    // Filter out any empty strings and uniquify
+    label_names = [...new Set(label_names.filter((label) => label != ""))];
 
     if (label_names.length > 0) {
       // Now, add the labels to the PR
