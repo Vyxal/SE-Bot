@@ -206,14 +206,16 @@ app.post("/pull-request", async (req, res) => {
       return res.sendStatus(201);
     }
 
-    let containsIssue = pr_body.match(/(close[sd]?|fixe?[sd]?|resolve[sd]?) #(\d+)/ig);
+    let containsIssue = pr_body.match(
+      /(close[sd]?|fixe?[sd]?|resolve[sd]?) #(\d+)/gi
+    );
     if (!containsIssue) {
       return res.sendStatus(201);
     }
 
     const label_names = [];
     for (const text of containsIssue) {
-      const issue_number = text.split('#')[1];
+      const issue_number = text.split("#")[1];
 
       // Check if the issue exists in the Vyxal repo
 
