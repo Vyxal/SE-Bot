@@ -214,6 +214,9 @@ app.post("/pull-request", async (req, res) => {
     }
 
     const label_names = [];
+    if (pr_body.title.includes('Update Production')) {
+      label_names.push('Production Update');
+    }
     for (const text of containsIssue) {
       const issue_number = text.split("#")[1];
 
