@@ -226,7 +226,7 @@ export default {
 
         if (
             content.match(
-                /^(status|((lol )?(yo)?u good( (there )?(my )?(epic )?(bro|dude|sis|buddy|mate|m8|gamer)?)?\?*))$/i
+                /^((what'?s your )status|((lol )?(yo)?u good( (there )?(my )?(epic )?(bro|dude|sis|buddy|mate|m8|gamer)?)?\?*)|(what|how) (is our beep boop|are you|the bot) doin[g']?\??|how are you\??|do you( is| are| done)* do\??|(beep boop|bot)( doing)? ok(ay)?\??)$/i
             )
         ) {
             return `${reply}I am doing ${choice(responses.STATUSES)}.`;
