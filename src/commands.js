@@ -276,18 +276,33 @@ export default {
                 /^(coffee|(make|brew)( a cup of)? coffee for) (.+?)$/i
             ))
         ) {
-            return `${reply}_brews a cup of coffee for @${match[4].replaceAll(
-                /\s+/g,
-                ""
-            )}_`;
+            if (match[4].replaceAll(/\s+/g, "") == "me") {
+                return `${reply}_brews a cup of coffee for you_`;
+            } else {
+                return `${reply}_brews a cup of coffee for @${match[4].replaceAll(
+                    /\s+/g,
+                    ""
+                )}_`;
+            }
         } else if (
-            content.match(/^(sudo |pl(s|z|ease?) )?make? meh? (a )?coo?kie?$/i)
+            content.match(
+                /^(sudo |pl(s|z|ease?) )?make? meh? (a )?(double choco chip )?coo?kie?$/i
+            )
         ) {
             if (content.indexOf("sudo") != -1) {
                 if (await client.isAdmin(message.user_id)) {
                     return reply + "[SUDO] Here you go: 🍪";
                 } else {
                     return reply + "No, you sussy baka.";
+                }
+            } else if ("double choco chip" in content) {
+                if (Math.random() <= 0.75) {
+                    return (
+                        reply +
+                        "https://emojipedia-us.s3.amazonaws.com/source/skype/289/cookie_1f36a.png"
+                    );
+                } else {
+                    return reply + "No.";
                 }
             } else {
                 if (Math.random() <= 0.75) {
