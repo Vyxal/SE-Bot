@@ -219,6 +219,50 @@ export default {
         }
     },
 
+    invite: async (content, reply, message, edited) => {
+        if (edited) return;
+
+        if (!(await message.client.isPrivileged(message.user_id))) {
+            return (
+                reply +
+                responses.NOT_PRIVILEGED.replaceAll(
+                    "USER_ID",
+                    message.user_id.toString()
+                )
+            );
+        }
+
+        user = content.match(/^.+$/i);
+        // Get the user's ID
+        const res = await gitRequest(`/users?q=${user}`, {
+            method: "GET",
+          });
+        const users = await res.json();
+        if (users.length == 0) {
+            return reply + "No such github user found.";
+        }
+        const userId = users[0].id;
+
+        // Create the invitation
+        const res2 = await gitRequest(`/orgs/Vyxal/invitations`, {
+            method: "POST",
+            body: JSON.stringify(
+                {
+                    org: "Vyxal",
+                    invitee_id: userId
+                }
+            )
+        })
+
+        if (res2.status == 404) {
+            return reply + "No such github user found.";
+        }
+        if (res2.status != 201) {
+            return "Something went wrong";
+        }
+        return reply + "Invitation sent.";
+    },
+
     _: async (content, reply, message, edited) => {
         let match;
 
