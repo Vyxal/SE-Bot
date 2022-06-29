@@ -158,102 +158,86 @@ app.post("/pull-request", async (req, res) => {
   if (
     action_text != "opened" &&
     action_text != "closed" &&
-    action_text != "reopened" &&
-    action_text != "edited"
+    action_text != "reopened"
   ) {
     return res.sendStatus(201);
   }
-
   if (action_text == "closed" && pr.merged_at) {
     action_text = "merged";
   }
 
-  if (action_text !== "edited") {
-    client.room.send(
-      truncate(
-        `${linkUser(req.body.sender.login)} ${action_text} ${linkPullRequest(
-          pr
-        )} (${pr.head.label} → ${pr.base.label}): _${msgify(pr.title)}_`
-      )
-    );
-  }
+  client.room.send(
+    truncate(
+      `${linkUser(req.body.sender.login)} ${action_text} ${linkPullRequest(
+        pr
+      )} (${pr.head.label} → ${pr.base.label}): _${msgify(pr.title)}_`
+    )
+  );
 
-  if (action_text == "opened" || action_text == "edited") {
+  if (action_text == "opened") {
     // If there is an attached issue, then we want to add the
     // corresponding label (if it exists) to the PR.
 
     // First of all, make sure that the repository is Vyxal/Vyxal
-
     if (pr.base.repo.full_name != "Vyxal/Vyxal") {
       return res.sendStatus(201);
     }
-
     // Next, make sure the PR doesn't already have labels. If there
     // are labels already, that means that the author has added
     // labels themselves.
-
     if (pr.labels.length > 0) {
       return res.sendStatus(201);
     }
-
     // Now, see if there is a linked issue.
     // We test to see if the issue is linked by checking if there are
     // closing keywords
-
     let pr_body = pr.body;
-
     if (!pr_body) {
       return res.sendStatus(201);
     }
 
-    let containsIssue = pr_body.match(
-      /(close[sd]?|fixe?[sd]?|resolve[sd]?) #(\d+)/gi
-    );
+    let containsIssue = pr_body.match(/([Cc]lose[sd]?|[Ff]ixe[sd]) #(\d+)/);
     if (!containsIssue) {
       return res.sendStatus(201);
     }
 
-    const label_names = [];
-    if (pr_body.title.includes('Update Production')) {
-      label_names.push('Production Update');
+    // If we get here, we know that the PR has an issue linked to it.
+    // We can now get the issue number.
+
+    let issue_number = containsIssue[2];
+
+    // Check if the issue exists in the Vyxal repo
+
+    const subres = await gitRequest(
+      `/repos/${pr.base.repo.full_name}/issues/${issue_number}`,
+      {
+        method: "GET",
+      }
+    );
+
+    if (subres.status != 200) {
+      return res.sendStatus(201);
     }
-    for (const text of containsIssue) {
-      const issue_number = text.split("#")[1];
 
-      // Check if the issue exists in the Vyxal repo
+    // If we get here, we know that the issue exists.
+    // We can now get the issue labels.
 
-      const subres = await gitRequest(
-        `/repos/${pr.base.repo.full_name}/issues/${issue_number}`,
-        {
-          method: "GET",
-        }
-      );
+    const issue = await subres.json();
+    let labels = issue.labels;
 
-      if (subres.status != 200) {
-        return res.sendStatus(201);
-      }
-
-      // If we get here, we know that the issue exists.
-      // We can now get the issue labels.
-
-      const issue = await subres.json();
-      const labels = issue.labels;
-
-      // Then, get the names of the labels
-      for (let i = 0; i < labels.length; i++) {
-        label_names.push(labels[i].name);
-      }
+    // Then, get the names of the labels
+    var label_names = [];
+    for (let i = 0; i < labels.length; i++) {
+      label_names.push(labels[i].name);
     }
 
     // Now, swap those out for the PR versions
-
     // (bug) -> (Bug Fix)
     // (documentation) -> (Documentation Fix)
     // (element request) -> (Element Implementation)
     // (enhancement) -> (Enhancement PR)
     // (difficulty: very hard) -> (Careful Review Required)
     // (priority: high) -> (Urgent Review Required)
-
     label_names = label_names.map((label) => {
       switch (label) {
         case "bug":
@@ -273,8 +257,8 @@ app.post("/pull-request", async (req, res) => {
       }
     });
 
-    // Filter out any empty strings and uniquify
-    label_names = [...new Set(label_names.filter((label) => label != ""))];
+    // Filter out any empty strings
+    label_names = label_names.filter((label) => label != "");
 
     if (label_names.length > 0) {
       // Now, add the labels to the PR
