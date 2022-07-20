@@ -27,6 +27,7 @@ export async function execute(flags, code, inputs, header = "", footer = "") {
 
     res = await request("https://vyxal.pythonanywhere.com/execute", {
         payload,
+        headers: { "Content-Type": "application/json" },
         jar,
     });
 
