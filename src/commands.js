@@ -339,7 +339,7 @@ export default {
                 } else {
                     return reply + "No, you sussy baka.";
                 }
-            } else if ("double choco chip" in content) {
+            } else if (content.includes("double choco chip")) {
                 if (Math.random() <= 0.75) {
                     return (
                         reply +
