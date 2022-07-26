@@ -428,6 +428,9 @@ export default {
             return reply + choice(responses.HUGS);
         } else if (content.match(/^sus$/i)) {
             return reply + "ඞ";
+        } else if (content.match(/^(d+a+d+|m+[ou]+m+)[!1]*$/i)) {
+            let res = content.match(/^(d+a+d+|m+[ou]+m+)[!1]*$/i)
+            return "@hyper-neutrino " + res
         } else if (content.match(/^repo(sitor(y|ies))? list$/i)) {
             const res = await gitRequest("/orgs/Vyxal/repos");
 
