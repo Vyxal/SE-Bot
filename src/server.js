@@ -238,6 +238,7 @@ app.post("/pull-request", async (req, res) => {
     // (enhancement) -> (Enhancement PR)
     // (difficulty: very hard) -> (Careful Review Required)
     // (priority: high) -> (Urgent Review Required)
+    // (online interpreter) -> (Online Interpreter PR)
     label_names = label_names.map((label) => {
       switch (label) {
         case "bug":
@@ -252,6 +253,8 @@ app.post("/pull-request", async (req, res) => {
           return "Careful Review Required";
         case "priority: high":
           return "Urgent Review Required";
+        case "online interpreter":
+          return "Online Interpreter PR";
         default:
           return "";
       }
